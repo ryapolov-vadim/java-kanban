@@ -7,19 +7,15 @@ import manager.Tasks.Status;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
+import java.util.List;
+import java.util.Map;
 
 public class TaskManager {
-    private HashMap<Integer, Task> tasks = new HashMap<>();
-    private HashMap<Integer, Epic> epical = new HashMap<>();
-    private HashMap<Integer, SubTask> subTasks = new HashMap<>();
-    private int counter = 0;
+    private Map<Integer, Task> tasks = new HashMap<>();
+    private Map<Integer, Epic> epical = new HashMap<>();
+    private Map<Integer, SubTask> subTasks = new HashMap<>();
 
-    private int nextId() {
-        return counter++;
-    }
-
-    public ArrayList<manager.Tasks.Task> findeAllTasks() {
+    public List<Task> findAllTasks() {
         //возврат списка всех задач
         return new ArrayList<>(tasks.values());
     }
@@ -38,8 +34,6 @@ public class TaskManager {
 
     public Task createTask(Task task) {
         //генерация id, сохранение в Map, возврат задачи с id
-        int newId = nextId();
-        task.setId(newId);
         tasks.put(task.getId(), task);
         return task;
     }
@@ -57,12 +51,11 @@ public class TaskManager {
 
     public Task deleteTask(Integer id) {
         //удаление задачи, возвращение удалённой задачи
-        Task task = tasks.remove(id);
-        return task;
+        return tasks.remove(id);
     }
     //реализация Epic
 
-    public ArrayList<manager.Tasks.Epic> findeAllEpic() {
+    public List<Epic> findAllEpic() {
         //возврат списка всех задач
         return new ArrayList<>(epical.values());
     }
@@ -81,8 +74,6 @@ public class TaskManager {
 
     public Epic createEpic(Epic epic) {
         //генерация id, сохранение в Map, возврат задачи с id
-        int newId = nextId();
-        epic.setId(newId);
         epic.setStatus(Status.NEW);
         epical.put(epic.getId(), epic);
         return epic;
@@ -94,33 +85,36 @@ public class TaskManager {
             Epic existingEpic = epical.get(epic.getId());
             existingEpic.setName(epic.getName());
             existingEpic.setDescription(epic.getDescription());
-            existingEpic.setSubTaskIds(epic.getSubTaskIds());
+            existingEpic.setSubTasksIds(epic.getSubTasksIds());
 
-            for (Integer idSubtask : existingEpic.getSubTaskIds())
-                for (SubTask subTask : subTasks.values()) {
-                    if (idSubtask == subTask.getEpicId()) {
-                        if (subTask.getStatus() == Status.DONE) {
-                            existingEpic.setStatus(Status.DONE);
-                        } else if (subTask.getStatus() == Status.IN_PROGRESS) {
-                            existingEpic.setStatus(Status.IN_PROGRESS);
-                        } else {
-                            epic.setStatus(Status.NEW);
-                        }
-                    }
+            boolean allDone = true;
+            Status newEpicStatus = Status.NEW;
+            for (Integer subTaskId : existingEpic.getSubTasksIds()) {
+                SubTask subTask = subTasks.get(subTaskId);
+                if (subTask.getStatus() == Status.IN_PROGRESS) {
+                    newEpicStatus = Status.IN_PROGRESS;
                 }
+                if (subTask.getStatus() != Status.DONE) {
+                    allDone = false;
+                }
+            }
+            if (allDone) {
+                newEpicStatus = Status.DONE;
+            }
+            existingEpic.setStatus(newEpicStatus);
+            return existingEpic;
         }
-        return epical.get(epic.getId());
+        return null;
     }
 
     public Epic deleteEpic(Integer id) {
         //удаление задачи, возвращение удалённой задачи
-        Epic epic = epical.remove(id);
-        return epic;
+        return epical.remove(id);
     }
 
     //реализация SubTask
 
-    public ArrayList<manager.Tasks.SubTask> findeAllSubTask() {
+    public List<SubTask> findAllSubTask() {
         //возврат списка всех задач
         return new ArrayList<>(subTasks.values());
     }
@@ -139,8 +133,6 @@ public class TaskManager {
 
     public SubTask createSubTask(SubTask subTask) {
         //генерация id, сохранение в Map, возврат задачи с id
-        int newId = nextId();
-        subTask.setId(newId);
         subTasks.put(subTask.getId(), subTask);
         return subTask;
     }

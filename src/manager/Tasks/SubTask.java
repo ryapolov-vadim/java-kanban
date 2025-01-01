@@ -3,19 +3,20 @@ package manager.Tasks;
 import java.util.Objects;
 
 public class SubTask extends Task {
-    Integer epicId;
+    Epic epic;
 
-    public SubTask(Integer id, String name, String description, Status status, Integer epicId) {
+
+    public SubTask(Integer id, String name, String description, Status status, Epic epic) {
         super(id, name, description, status);
-        this.epicId = epicId;
+        this.epic = epic;
     }
 
-    public Integer getEpicId() {
-        return epicId;
+    public Epic getEpic() {
+        return epic;
     }
 
-    public void setEpicId(Integer epicId) {
-        this.epicId = epicId;
+    public void setEpic(Epic epic) {
+        this.epic = epic;
     }
 
     @Override
@@ -23,11 +24,11 @@ public class SubTask extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SubTask subTask = (SubTask) o;
-        return Objects.equals(epicId, subTask.epicId);
+        return Objects.equals(epic, subTask.epic);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), epicId);
+        return Objects.hash(super.hashCode(), epic);
     }
 }
