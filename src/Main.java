@@ -36,10 +36,9 @@ public class Main {
                 Status.NEW, createdEpic));
         Integer sbTask1Id = subTask1.getId();
         SubTask subTaskUpdate = taskManager.updateSubTask(new SubTask(subtaskId, "Фундамент",
-                "Заливка фундамента", Status.IN_PROGRESS, createdEpic));
+                "Заливка фундамента", Status.NEW, createdEpic));
         SubTask subTask1Update = taskManager.updateSubTask(new SubTask(sbTask1Id, "Стены",
-                "Купить блоки", Status.NEW, createdEpic));
-        Epic epic3 = taskManager.updateEpic(epic1);
+                "Купить блоки", Status.IN_PROGRESS, createdEpic));
 
         List<SubTask> epicSubtask = taskManager.findAllEpicSubtasks(epic1);
 

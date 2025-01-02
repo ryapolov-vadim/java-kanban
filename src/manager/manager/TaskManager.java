@@ -68,7 +68,7 @@ public class TaskManager {
     }
 
     public Epic createEpic(Epic epic) {
-        epic.setStatus(Status.NEW);
+        //epic.setStatus(Status.NEW);
         epical.put(epic.getId(), epic);
         return epic;
     }
@@ -79,23 +79,6 @@ public class TaskManager {
             existingEpic.setName(epic.getName());
             existingEpic.setDescription(epic.getDescription());
             existingEpic.setSubTasksIds(epic.getSubTasksIds());
-
-            boolean allDone = true;
-            Status newEpicStatus = Status.NEW;
-            for (Integer subTaskId : existingEpic.getSubTasksIds()) {
-                SubTask subTask = subTasks.get(subTaskId);
-                if (subTask.getStatus() == Status.IN_PROGRESS) {
-                    newEpicStatus = Status.IN_PROGRESS;
-                }
-                if (subTask.getStatus() != Status.DONE) {
-                    allDone = false;
-                }
-            }
-            if (allDone) {
-                newEpicStatus = Status.DONE;
-            }
-            existingEpic.setStatus(newEpicStatus);
-            return existingEpic;
         }
         return null;
     }
@@ -154,6 +137,23 @@ public class TaskManager {
             existingSubtask.setName(subTask.getName());
             existingSubtask.setDescription(subTask.getDescription());
             existingSubtask.setStatus(subTask.getStatus());
+            Epic existingEpic = epical.get(subTask.getEpicId());
+
+            boolean allDone = true;
+            Status newEpicStatus = Status.NEW;
+            for (Integer subTaskId : existingEpic.getSubTasksIds()) {
+                SubTask idSubTask = subTasks.get(subTaskId);
+                if (idSubTask.getStatus() == Status.IN_PROGRESS) {
+                    newEpicStatus = Status.IN_PROGRESS;
+                }
+                if (idSubTask.getStatus() != Status.DONE) {
+                    allDone = false;
+                }
+            }
+            if (allDone) {
+                newEpicStatus = Status.DONE;
+            }
+            existingEpic.setStatus(newEpicStatus);
         }
         return subTask;
     }
