@@ -7,14 +7,9 @@ public class Task {
     private String name;
     private String description;
     private Status status;
-    private static int counter = 0;
 
     public Task(Integer id, String name, String description, Status status) {
-        if (id == null) {
-            this.id = ++counter;
-        } else {
-            this.id = id;
-        }
+        this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
@@ -22,11 +17,7 @@ public class Task {
 
     public Task(Integer id, String name, String description) {
         //конструктор для Epic
-        if (id == null) {
-            this.id = ++counter;
-        } else {
-            this.id = id;
-        }
+        this.id = id;
         this.name = name;
         this.description = description;
     }

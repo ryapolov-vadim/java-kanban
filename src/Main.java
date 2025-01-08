@@ -36,11 +36,12 @@ public class Main {
                 Status.NEW, createdEpic));
         Integer sbTask1Id = subTask1.getId();
         SubTask subTaskUpdate = taskManager.updateSubTask(new SubTask(subtaskId, "Фундамент",
-                "Заливка фундамента", Status.NEW, createdEpic));
+                "Заливка фундамента", Status.IN_PROGRESS, createdEpic));
         SubTask subTask1Update = taskManager.updateSubTask(new SubTask(sbTask1Id, "Стены",
-                "Купить блоки", Status.IN_PROGRESS, createdEpic));
+                "Купить блоки", Status.DONE, createdEpic));
+        //SubTask subTask2 = taskManager.createSubTask()
 
-        List<SubTask> epicSubtask = taskManager.findAllEpicSubtasks(epic1);
+
 
         Epic epic2 = taskManager.createEpic(new Epic(null, "Сходить в поход", "Купить всё к походу"));
         Integer epic2Id = epic2.getId();
@@ -48,16 +49,20 @@ public class Main {
                 Status.NEW, epic2Id));
         Integer subTask4Id = subTask4.getId();
         SubTask subTask4Update = taskManager.updateSubTask(new SubTask(subTask4Id, "Покупки",
-                "Купить батон", Status.IN_PROGRESS, epic2Id));
+                "Купить батон", Status.NEW, epic2Id));
+        //удаление всех Сабтасков
+        //taskManager.deleteAllSubTask();
         //удаление конкретного Эпика
         //Epic epic2Delete = taskManager.deleteEpic(epic2Id);
+        List<SubTask> epicSubtask = taskManager.findAllEpicSubtasks(epic1);
         List<Epic> epic = taskManager.findAllEpic();
         List<SubTask> epik2Subtask = taskManager.findAllEpicSubtasks(epic2);
+
         //вывести все эпики
         System.out.println(epic);
         System.out.println();
 
-        //вывести все подзадачи определенных эпиков
+        //вывести все подзадачи определенного эпика
         System.out.println(epicSubtask);
         System.out.println();
         //вывод подзадачи определенного Эпика
