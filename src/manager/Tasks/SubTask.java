@@ -3,8 +3,8 @@ package manager.Tasks;
 public class SubTask extends Task {
     private Integer epicId;
 
-    public SubTask(Integer id, String name, String description, Status status, Integer epicId) {
-        super(id, name, description, status);
+    public SubTask(String name, String description, Status status, Integer epicId) {
+        super(name, description, status);
         this.epicId = epicId;
     }
 

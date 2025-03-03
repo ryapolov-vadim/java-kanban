@@ -8,19 +8,13 @@ public class Task {
     private String description;
     private Status status;
 
-    public Task(Integer id, String name, String description, Status status) {
-        this.id = id;
+
+    public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.status = status;
     }
 
-    public Task(Integer id, String name, String description) {
-        //конструктор для Epic
-        this.id = id;
-        this.name = name;
-        this.description = description;
-    }
 
     public Integer getId() {
         return id;
@@ -58,7 +52,8 @@ public class Task {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return Objects.equals(id, task.id) && Objects.equals(name, task.name) && Objects.equals(description, task.description) && status == task.status;
+        return Objects.equals(id, task.id) && Objects.equals(name, task.name)
+                && Objects.equals(description, task.description) && status == task.status;
     }
 
     @Override
