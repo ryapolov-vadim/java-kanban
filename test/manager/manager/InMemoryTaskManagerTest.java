@@ -76,7 +76,8 @@ class InMemoryTaskManagerTest {
         final int epicId = manager.createEpic(epic);
 
         // Подготовка
-        SubTask subTask = new SubTask("Test addNewSubTask", "Test addNewSubTask description", Status.NEW, epicId);
+        SubTask subTask = new SubTask("Test addNewSubTask", "Test addNewSubTask description",
+                Status.NEW, epicId);
         final int subTaskId = manager.createSubTask(subTask);
 
         // Исполнение

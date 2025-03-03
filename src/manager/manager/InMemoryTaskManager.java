@@ -11,15 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    HistoryManager historyManager;
+    private HistoryManager historyManager = Managers.getDefaultHistory();
     private Map<Integer, Task> tasks = new HashMap<>();
     private Map<Integer, Epic> epical = new HashMap<>();
     private Map<Integer, SubTask> subTasks = new HashMap<>();
     private int counter = 0;
-
-    public InMemoryTaskManager(HistoryManager historyManager) {
-        this.historyManager = historyManager;
-    }
 
     //методы Таска
     @Override
@@ -230,7 +226,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getHistory() {
-        return historyManager.getBrowsingHistory();
+        return historyManager.getHistory();
     }
 
     private int nextId() {

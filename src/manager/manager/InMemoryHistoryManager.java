@@ -10,7 +10,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private int counterHistory = 10;
 
     @Override
-    public <T extends Task> void add(T task) {
+    public void add(Task task) {
 
         if (counterHistory > browsingHistory.size()) {
             browsingHistory.add(task);
@@ -21,7 +21,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public List<Task> getBrowsingHistory() {
+    public List<Task> getHistory() {
         return new ArrayList<>(browsingHistory);
     }
 

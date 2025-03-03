@@ -36,12 +36,9 @@ public class Main {
         manager.createSubTask(subTask1);
         //manager.deleteEpic(epic.getId());
 
-
-
         List<Task> tasks = manager.findAllTasks();
         List<Epic> epics = manager.findAllEpic();
         List<SubTask> subTasks = manager.findAllSubTask();
-
 
         System.out.println("вывод задачь");
         System.out.println(tasks);
