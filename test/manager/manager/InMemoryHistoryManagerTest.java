@@ -41,11 +41,13 @@ class InMemoryHistoryManagerTest {
         List<Task> history = manager.getHistory();
         assertEquals(task1, history.get(task1.getId()));
         Task taskOldVersion = new Task(task1.getName(), task1.getDescription(), task1.getStatus());
+
         taskOldVersion.setId(task1.getId());
         //Исполнение
         manager.updateTask(idTask, task3Update);
         manager.findTaskById(idTask);
         List<Task> history2 = manager.getHistory();
+
         //Проверка
         assertEquals(2, history2.size());
         assertEquals(taskOldVersion, history2.get(0));
@@ -57,6 +59,7 @@ class InMemoryHistoryManagerTest {
         //Подготовка
         limit = 4;
         limitHistiry = 10;
+
         //Исполнение
         for (int i = 0; i < limit; i++) {
             manager.findTaskById(idTask);
@@ -67,6 +70,7 @@ class InMemoryHistoryManagerTest {
         for (int i = 0; i < limit; i++) {
             manager.findSubTaskById(idSubTask);
         }
+
         //Проверка
         List<Task> history = manager.getHistory();
         assertEquals(limitHistiry, history.size());
@@ -78,8 +82,10 @@ class InMemoryHistoryManagerTest {
         manager.findTaskById(-100);
         manager.findEpicById(-100);
         manager.findSubTaskById(-100);
+
         //Исполнение
         List<Task> history = manager.getHistory();
+
         //Проверка
         assertEquals(0, history.size());
     }
