@@ -13,6 +13,33 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Map<Integer, Node> browsingHistory = new HashMap<>();
 
 
+    @Override
+    public void add(Task task) {
+        if (task == null) return;
+        if (browsingHistory.containsKey(task.getId())) {
+
+            removeNode(browsingHistory.get(task.getId()));
+        }
+        linkLast(task);
+        browsingHistory.put(task.getId(), this.tail);
+    }
+
+    @Override
+    public void remove(int id) {
+        if (browsingHistory.get(id) == null) {
+            return;
+        } else {
+            Node node = browsingHistory.get(id);
+            removeNode(node);
+            browsingHistory.remove(id);
+        }
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return getTasks();
+    }
+
     private void linkLast(Task task) {
         Node newNode = new Node(task);
         if (tail == null) {
@@ -55,32 +82,5 @@ public class InMemoryHistoryManager implements HistoryManager {
                 tail = null;
             }
         }
-    }
-
-    @Override
-    public void add(Task task) {
-        if (task == null) return;
-        if (browsingHistory.containsKey(task.getId())) {
-
-            removeNode(browsingHistory.get(task.getId()));
-        }
-        linkLast(task);
-        browsingHistory.put(task.getId(), this.tail);
-    }
-
-    @Override
-    public void remove(int id) {
-        if (browsingHistory.get(id) == null) {
-            return;
-        } else {
-            Node node = browsingHistory.get(id);
-            removeNode(node);
-            browsingHistory.remove(id);
-        }
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        return getTasks();
     }
 }
