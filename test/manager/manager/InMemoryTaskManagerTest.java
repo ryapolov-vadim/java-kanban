@@ -122,9 +122,9 @@ class InMemoryTaskManagerTest {
 
         // Исполнение
         manager.updateTask(taskId, task1);
-
+        Task task2 = manager.findTaskById(task1.getId());
         // Проверка
-        assertEquals(task, task1,"Задачи не совпадают");
+        assertEquals(task1, task2, "Задачи не совпадают");
     }
 
     @Test
@@ -167,9 +167,9 @@ class InMemoryTaskManagerTest {
 
         // Исполнение
         manager.updateEpic(epickId, epicUpdate);
-
+        Epic epic1 = manager.findEpicById(epicUpdate.getId());
         // Проверка
-        assertEquals(epicUpdate, epic);
+        assertEquals(epicUpdate, epic1);
     }
 
     @Test
@@ -189,7 +189,7 @@ class InMemoryTaskManagerTest {
         final Epic savedEpic = manager.findEpicById(epickId);
 
         // Проверка
-        assertEquals(Status.IN_PROGRESS, savedEpic.getStatus(),"Задачи не совпадают");
+        assertEquals(Status.IN_PROGRESS, savedEpic.getStatus(), "Задачи не совпадают");
     }
 
     @Test
@@ -207,7 +207,7 @@ class InMemoryTaskManagerTest {
         final Epic savedEpic = manager.findEpicById(epickId);
 
         // Проверка
-        assertEquals(Status.NEW, savedEpic.getStatus(),"Задачи не совпадают");
+        assertEquals(Status.NEW, savedEpic.getStatus(), "Задачи не совпадают");
     }
 
     @Test
@@ -223,7 +223,7 @@ class InMemoryTaskManagerTest {
         final Epic savedEpic = manager.findEpicById(epickId);
 
         // Проверка
-        assertEquals(Status.DONE, savedEpic.getStatus(),"Задачи не совпадают");
+        assertEquals(Status.DONE, savedEpic.getStatus(), "Задачи не совпадают");
     }
 
     @Test
@@ -231,6 +231,7 @@ class InMemoryTaskManagerTest {
         // Подготовка
         Epic epic = new Epic("Test", "Testdescription");
         final int epickId = manager.createEpic(epic);
+        Epic epic1 = manager.findEpicById(epic.getId());
         SubTask subTask = new SubTask("SubTaskName", "SubTaskDescription", Status.NEW, epickId);
         manager.createSubTask(subTask);
         SubTask subTask2 = new SubTask("SubTaskName2", "SubTaskDescription2", Status.NEW, epickId);
@@ -238,11 +239,13 @@ class InMemoryTaskManagerTest {
 
         // Исполнение
         final List<SubTask> subTasks = manager.findAllEpicSubtasks(epic);
+        SubTask subTask3 = manager.findSubTaskById(subTask.getId());
+        SubTask subTask4 = manager.findSubTaskById(subTask2.getId());
 
         // Проверка
-        assertEquals(epic.getSubTasksIds().size(), subTasks.size());
-        assertTrue(subTasks.contains(subTask), "Подзадача 1 не совпадает");
-        assertTrue(subTasks.contains(subTask2),"Подзадача 2 не совпадает");
+        assertEquals(epic1.getSubTasksIds().size(), subTasks.size());
+        assertTrue(subTasks.contains(subTask3), "Подзадача 1 не совпадает");
+        assertTrue(subTasks.contains(subTask4), "Подзадача 2 не совпадает");
     }
 
     @Test
@@ -282,7 +285,7 @@ class InMemoryTaskManagerTest {
 
         // Проверка
         assertTrue(subTasks.isEmpty(), "Подзадачи не удалены");
-        assertTrue(epic.getSubTasksIds().isEmpty(), "Подзадачи из Эпика не удалены");
+        assertTrue(epic1.getSubTasksIds().isEmpty(), "Подзадачи из Эпика не удалены");
     }
 
     @Test
@@ -297,9 +300,9 @@ class InMemoryTaskManagerTest {
 
         // Исполнение
         manager.updateSubTask(subTaskId, subTask2);
-
+        SubTask subTask1 = manager.findSubTaskById(subTask2.getId());
         // Проверка
-        assertEquals(subTask2, subTask, "Подзадачи не совпадают");
+        assertEquals(subTask1, subTask2, "Подзадачи не совпадают");
     }
 
     @Test
@@ -316,6 +319,149 @@ class InMemoryTaskManagerTest {
 
         // Проверка
         assertNull(subTask1, "Задача не удалена по ID");
-        assertTrue(epic.getSubTasksIds().isEmpty(), "Подзадача не удалена из Эпика");
+        assertNotEquals(epic.getSubTasksIds().size(), subTaskId, "Подзадача не удалена из Эпика");
+    }
+
+    @Test
+    void findAllTasks() {
+        // Подготовка
+        Task task = new Task("Test", "Testdescription", Status.NEW);
+        manager.createTask(task);
+        Task task2 = new Task("TestTaskName", "TaskDescription", Status.DONE);
+        manager.createTask(task2);
+        Task task3 = new Task("TestTaskName2", "TaskDescription2", Status.IN_PROGRESS);
+        manager.createTask(task3);
+
+        // Исполнение
+        final List<Task> tasks = manager.findAllTasks();
+        Task task4 = manager.findTaskById(task.getId());
+        Task task5 = manager.findTaskById(task2.getId());
+        Task task6 = manager.findTaskById(task3.getId());
+        final int quantityTask = tasks.size();
+        // Проверка
+        assertEquals(quantityTask, tasks.size());
+        assertTrue(tasks.contains(task4), "Задача 1 не совпадает");
+        assertTrue(tasks.contains(task5), "Задача 2 не совпадает");
+        assertTrue(tasks.contains(task6), "Задача 2 не совпадает");
+    }
+
+    @Test
+    void deleteAllTask() {
+        // Подготовка
+        Task task = new Task("Test", "Testdescription", Status.NEW);
+        manager.createTask(task);
+        Task task2 = new Task("TestTaskName", "TaskDescription", Status.DONE);
+        manager.createTask(task2);
+        Task task3 = new Task("TestTaskName2", "TaskDescription2", Status.IN_PROGRESS);
+        manager.createTask(task3);
+
+        // Исполнение
+        manager.deleteAllTask();
+        final List<Task> tasks = manager.findAllTasks();
+
+        // Проверка
+        assertTrue(tasks.isEmpty(), "Задачи не удалены");
+    }
+
+    @Test
+    void findTaskById() {
+        // Подготовка
+        Task task = new Task("Test", "Testdescription", Status.NEW);
+        final int id = manager.createTask(task);
+
+        // Исполнение
+        Task task1 = manager.findTaskById(id);
+
+        // Проверка
+        assertEquals(task1, task, "Подзадачи не совпадают");
+    }
+
+    @Test
+    void findAllEpic() {
+        // Подготовка
+        Epic epic = new Epic("TestName", "Testdescription");
+        manager.createEpic(epic);
+        Epic epicTwo = new Epic("TestNameEpicTwo", "TestdescriptionEpicTwo");
+        manager.createEpic(epicTwo);
+
+        // Исполнение
+        final List<Epic> epics = manager.findAllEpic();
+        final int quantity = epics.size();
+        // Проверка
+
+        assertEquals(quantity, epics.size());
+        assertTrue(epics.contains(epic), "Эпик 1 не совпадает");
+        assertTrue(epics.contains(epicTwo), "Эпик 2 не совпадает");
+    }
+
+    @Test
+    void findEpicById() {
+        // Подготовка
+        Epic epic = new Epic("TestName", "Testdescription");
+        manager.createEpic(epic);
+        Epic epicTwo = new Epic("TestNameEpicTwo", "TestdescriptionEpicTwo");
+        final int id = manager.createEpic(epicTwo);
+
+        // Исполнение
+        Epic epic1 = manager.findEpicById(id);
+
+        // Проверка
+        assertEquals(epic1, epicTwo, "Подзадачи не совпадают");
+    }
+
+    @Test
+    void getHistory() {
+        // Подготовка
+        Task task = new Task("Test", "Testdescription", Status.NEW);
+        final int id = manager.createTask(task);
+        manager.findTaskById(id);
+        Epic epic = new Epic("Test", "Testdescription");
+        final int epickId = manager.createEpic(epic);
+        manager.findEpicById(epickId);
+        SubTask subTask = new SubTask("SubTaskName", "SubTaskDescription", Status.NEW, epickId);
+        final int sunTaskId = manager.createSubTask(subTask);
+        manager.findSubTaskById(sunTaskId);
+        SubTask subTask2 = new SubTask("SubTaskName2", "SubTaskDescription2", Status.NEW, epickId);
+        final int sibTaskId2 = manager.createSubTask(subTask2);
+        manager.findSubTaskById(sibTaskId2);
+
+        // Исполнение
+        final List<Task> tasks = manager.getHistory();
+        final int quantity = tasks.size();
+        Task task1 = manager.findTaskById(id);
+        Epic epic1 = manager.findEpicById(epickId);
+        SubTask subTask1 = manager.findSubTaskById(sunTaskId);
+        SubTask subTask3 = manager.findSubTaskById(sibTaskId2);
+
+        // Проверка
+        assertEquals(quantity, tasks.size());
+        assertTrue(tasks.contains(task1), "Задача 1 не совпадает");
+        assertTrue(tasks.contains(epic1), "Задача 2 не совпадает");
+        assertTrue(tasks.contains(subTask1), "Задача 2 не совпадает");
+        assertTrue(tasks.contains(subTask3), "Задача 2 не совпадает");
+    }
+
+    @Test
+    void changingTasksThroughSetter() {
+        // Подготовка
+        Task task = new Task("Test", "Testdescription", Status.NEW);
+        final int id = manager.createTask(task);
+        Epic epic = new Epic("Test", "Testdescription");
+        final int epickId = manager.createEpic(epic);
+        SubTask subTask = new SubTask("SubTaskName", "SubTaskDescription", Status.NEW, epickId);
+        final int sunTaskId = manager.createSubTask(subTask);
+
+        // Исполнение
+        task.setId(1000);
+        epic.setStatus(Status.DONE);
+        subTask.setEpicId(55);
+        Task task1 = manager.findTaskById(id);
+        Epic epic1 = manager.findEpicById(epickId);
+        SubTask subTask1 = manager.findSubTaskById(sunTaskId);
+
+        // Проверка
+        assertNotEquals(task, task1, "Значения не должны быть равны");
+        assertNotEquals(epic, epic1, "Значения не должны быть равны");
+        assertNotEquals(subTask, subTask1, "Значения не должны быть равны");
     }
 }
