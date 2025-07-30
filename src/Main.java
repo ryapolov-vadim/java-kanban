@@ -2,64 +2,49 @@ import manager.Tasks.Epic;
 import manager.Tasks.Status;
 import manager.Tasks.SubTask;
 import manager.Tasks.Task;
-import manager.manager.Managers;
-import manager.manager.TaskManager;
+import manager.manager.FileBackedTaskManager;
 
+import java.io.File;
 import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager manager = Managers.getDefault();
-        Task task = new Task("Task1", "Task1", Status.NEW);
-        manager.createTask(task);
-        manager.findTaskById(task.getId());
-        manager.updateTask(task.getId(), new Task("Таск1", "Таск1", Status.IN_PROGRESS));
-        manager.findTaskById(task.getId());
-        //manager.deleteAllTask();
+        File file = new File("backupFile\\backup.CSV");
+        FileBackedTaskManager fBTaskManager = new FileBackedTaskManager(file);
 
-        Epic epic = new Epic("Epic1", "Epic1");
-        Epic epic1 = new Epic("Epic2", "Epic2");
-        manager.createEpic(epic);
-        manager.createEpic(epic1);
-        manager.findEpicById(epic.getId());
-        manager.updateEpic(epic.getId(), new Epic("Эпик1", "Эпик1"));
-        manager.findEpicById(epic.getId());
-        //manager.deleteAllEpic();
+        Task task = new Task("Task1", "Description Task1", Status.NEW);
+        fBTaskManager.createTask(task);
+        Task task2 = new Task("Task2", "Description Task2", Status.IN_PROGRESS);
+        fBTaskManager.createTask(task2);
+        Task task3 = new Task("Task3", "Description Task3", Status.DONE);
+        fBTaskManager.createTask(task3);
 
-        SubTask subTask = new SubTask("SubTask1", "SubTask1", Status.NEW, epic.getId());
-        manager.createSubTask(subTask);
-        manager.findSubTaskById(subTask.getId());
-        manager.updateSubTask(subTask.getId(), new SubTask("Сабтаск1", "Сабтаск1",
-                Status.DONE, epic.getId()));
-        SubTask subTask1 = new SubTask("SubTask2", "SubTask2", Status.IN_PROGRESS, epic.getId());
-        manager.createSubTask(subTask1);
-        manager.findSubTaskById(subTask1.getId());
-        //manager.deleteEpic(epic.getId());
-        //manager.deleteAllEpic();
-        //manager.deleteSubTask(subTask1.getId());
+        Epic epic = new Epic("Epic1", "Description Epic1");
+        Epic epic2 = new Epic("Epic2", "Description Epic2");
+        fBTaskManager.createEpic(epic);
+        fBTaskManager.createEpic(epic2);
 
-        List<Task> tasks = manager.findAllTasks();
-        List<Epic> epics = manager.findAllEpic();
-        List<SubTask> subTasks = manager.findAllSubTask();
+        SubTask subTask = new SubTask("SubTask1", "Description SubTask1", Status.DONE, epic.getId());
+        SubTask subTask2 = new SubTask("SubTask2", "Description SubTask2", Status.NEW, epic.getId());
+        SubTask subTask3 = new SubTask("SubTask3", "Description SubTask3", Status.IN_PROGRESS, epic2.getId());
+        fBTaskManager.createSubTask(subTask);
+        fBTaskManager.createSubTask(subTask2);
+        fBTaskManager.createSubTask(subTask3);
 
-        System.out.println("вывод задачь");
+        FileBackedTaskManager fileBackedTaskManager = FileBackedTaskManager.loadFromFile(file);
+        List<Task> tasks = fileBackedTaskManager.findAllTasks();
+        List<Epic> epics = fileBackedTaskManager.findAllEpic();
+        List<SubTask> subTasks = fileBackedTaskManager.findAllSubTask();
+
+        System.out.println("Вывод Задач");
         System.out.println(tasks);
         System.out.println();
-        System.out.println("вывод эпиков");
+        System.out.println("Вывод Эпиков");
         System.out.println(epics);
         System.out.println();
-        System.out.println("вывод подзадач");
+        System.out.println("Вывод Сабтасков");
         System.out.println(subTasks);
-        System.out.println();
-        System.out.println("Вывод истории");
-        List<Task> history = manager.getHistory();
-        System.out.println(history);
-        System.out.println();
-        System.out.println("вывод подзадач определённого Эпика");
-        List<SubTask> subTasks1 = manager.findAllEpicSubtasks(epic);
-        System.out.println(subTasks1);
-        System.out.println();
     }
 }
