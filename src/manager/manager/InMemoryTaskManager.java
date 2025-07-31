@@ -12,10 +12,10 @@ import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     private HistoryManager historyManager = Managers.getDefaultHistory();
-    private Map<Integer, Task> tasks = new HashMap<>();
-    private Map<Integer, Epic> epical = new HashMap<>();
-    private Map<Integer, SubTask> subTasks = new HashMap<>();
-    private int counter = 0;
+    protected Map<Integer, Task> tasks = new HashMap<>();
+    protected Map<Integer, Epic> epical = new HashMap<>();
+    protected Map<Integer, SubTask> subTasks = new HashMap<>();
+    protected int counter = 1;
 
     //методы Таска
     @Override
@@ -104,7 +104,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setId(newId);
         Epic epic1 = new Epic(epic.getName(), epic.getDescription());
         epic1.setId(epic.getId());
-        epical.put(epic1.getId(), epic1); //!!!!!!!!!!!!!!!!!!!!!!!!
+        epical.put(epic1.getId(), epic1);
         return epic.getId();
     }
 
