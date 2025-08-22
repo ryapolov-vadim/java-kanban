@@ -3,28 +3,7 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="C:\Users\User\AppData\Local\Temp\backupTest15520301873450988996.CSV">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="C:\Users\User\AppData\Local\Temp\backupTest3270960672279469518.CSV">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="C:\Users\User\AppData\Local\Temp\backupTest3607900400044475225.CSV">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="C:\Users\User\AppData\Local\Temp\backupTest4242478114601499057.CSV">
+        <entry key="\backup.CSV">
           <value>
             <Attribute>
               <option name="separator" value="," />

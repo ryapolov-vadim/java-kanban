@@ -1,0 +1,5 @@
+id,type,name,status,description,epic,duration,startTime,endTime
+1,EPIC,Epic1,DONE,Description Epic1,,90,01.01.2020 - 09:00,01.01.2020 - 10:30
+2,SUBTASK,SubTask1,DONE,Description SubTask1,1,30,01.01.2020 - 09:00,01.01.2020 - 09:30
+3,SUBTASK,SubTask2,DONE,Description SubTask2,1,30,01.01.2020 - 09:30,01.01.2020 - 10:00
+4,SUBTASK,SubTask3,DONE,Description SubTask3,1,30,01.01.2020 - 10:00,01.01.2020 - 10:30

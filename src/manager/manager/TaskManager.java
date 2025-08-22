@@ -5,6 +5,7 @@ import manager.Tasks.SubTask;
 import manager.Tasks.Task;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
 
@@ -47,5 +48,7 @@ public interface TaskManager {
     SubTask deleteSubTask(Integer id);
 
     List<Task> getHistory();
+
+    List<Task> getPrioritizedTasks();
 
 }

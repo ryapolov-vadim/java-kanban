@@ -8,371 +8,175 @@ import manager.exception.ManagerFileInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class FileBackedTaskManagerTest {
-    FileBackedTaskManager fBTaskManager;
-    File tempFile;
+class FileBackedTaskManagerTest extends AbstractTaskManagerTest<FileBackedTaskManager> {
+    private File file;
 
     @BeforeEach
-    void setupClass() {
+    void setupFile() {
         try {
-            tempFile = File.createTempFile("backupTest", ".CSV");
-            fBTaskManager = new FileBackedTaskManager(tempFile);
+            file = File.createTempFile("backupTest", ".CSV");
+            manager = getTaskManager();
         } catch (IOException e) {
-            String errorMessage = "Ошибка создания менеджера";
-            throw new ManagerFileInitializationException(errorMessage + e.getMessage());
+            throw new ManagerFileInitializationException("Ошибка создания файла для теста: " + e.getMessage());
         }
     }
 
-    @Test
-    void deleteAllTask() {
-        //Подготовка
-        Task task = new Task("Task1", "Description Task1", Status.NEW);
-        fBTaskManager.createTask(task);
-        Task task2 = new Task("Task2", "Description Task2", Status.IN_PROGRESS);
-        fBTaskManager.createTask(task2);
-        Task task3 = new Task("Task3", "Description Task3", Status.DONE);
-        fBTaskManager.createTask(task3);
-
-        // Исполнение
-        fBTaskManager.deleteAllTask();
-        final List<Task> tasks = fBTaskManager.findAllTasks();
-
-        // Проверка
-        assertTrue(tasks.isEmpty(), "Должен быть пустой");
+    @Override
+    FileBackedTaskManager getTaskManager() {
+        return new FileBackedTaskManager(file);
     }
 
     @Test
-    void createTask() {
-        Task task = new Task("Task1", "Description Task1", Status.NEW);
-        final int taskId = fBTaskManager.createTask(task);
-
-        // Исполнение
-        final Task savedTask = fBTaskManager.findTaskById(taskId);
-
-        // Проверка
-        assertNotNull(savedTask, "Задача не найдена.");
-        assertEquals(task, savedTask, "Задачи не совпадают.");
-
-        // Исполнение
-        final List<Task> tasks = fBTaskManager.findAllTasks();
-
-        // Проверка
-        assertNotNull(tasks, "Задачи не возвращаются.");
-        assertEquals(1, tasks.size(), "Неверное количество задач.");
-        assertEquals(task, tasks.get(0), "Задачи не совпадают.");
-    }
-
-    @Test
-    void updateTask() {
+    void savingMultipleTasksToAFile() {
         // Подготовка
-        Task task = new Task("Test", "Testdescription", Status.NEW);
-        final int taskId = fBTaskManager.createTask(task);
-        Task task1 = new Task("Test NewTask", "Test NewTask description", Status.DONE);
-
-        // Исполнение
-        fBTaskManager.updateTask(taskId, task1);
-        Task task2 = fBTaskManager.findTaskById(task1.getId());
-        // Проверка
-        assertEquals(task1, task2, "Задачи не совпадают");
-    }
-
-    @Test
-    void deleteTask() {
-        // Подготовка
-        Task task = new Task("Test addNewTask", "Test addNewTask description", Status.NEW);
-        final int taskId = fBTaskManager.createTask(task);
-
-        // Исполнение
-        fBTaskManager.deleteTask(taskId);
-        Task task1 = fBTaskManager.findTaskById(taskId);
-
-        // Проверка
-        assertNull(task1, "Задача не удалена по ID");
-    }
-
-    @Test
-    void deleteAllEpic() {
-        //Подготовка
+        Task task = new Task("Task1", "Description Task1", Status.NEW, Duration.ofMinutes(30),
+                LocalDateTime.parse("01.01.2020 - 09:00", dtf));
+        manager.createTask(task);
         Epic epic = new Epic("Epic1", "Description Epic1");
-        Epic epic1 = new Epic("Epic2", "Description Epic2");
-        fBTaskManager.createEpic(epic);
-        fBTaskManager.createEpic(epic1);
+        manager.createEpic(epic);
+        SubTask subTask = new SubTask("SubTask1", "Description SubTask1",
+                Status.DONE, Duration.ofMinutes(30),
+                LocalDateTime.parse("02.01.2020 - 09:00", dtf), epic.getId());
+        manager.createSubTask(subTask);
 
         // Исполнение
-        fBTaskManager.deleteAllEpic();
-        final List<Epic> tasks = fBTaskManager.findAllEpic();
-
-        // Проверка
-        assertTrue(tasks.isEmpty(), "Должен быть пустой");
-    }
-
-    @Test
-    void createEpic() {
-        // Подготовка
-        Epic epic = new Epic("Test addNewEpic", "Test addNewEpic description");
-        final int epicId = fBTaskManager.createEpic(epic);
-
-        // Исполнение
-        final Epic savedEpic = fBTaskManager.findEpicById(epicId);
-
-        // Проверка
-        assertNotNull(savedEpic, "Задача не найдена.");
-        assertEquals(epic, savedEpic, "Задачи не совпадают.");
-
-        // Исполнение
-        final List<Epic> epics = fBTaskManager.findAllEpic();
-
-        // Проверка
-        assertNotNull(epics, "Задачи не возвращаются.");
-        assertEquals(1, epics.size(), "Неверное количество задач.");
-        assertEquals(epic, epics.get(0), "Задачи не совпадают.");
-    }
-
-    @Test
-    void updateEpic() {
-        // Подготовка
-        Epic epic = new Epic("TestName", "Testdescription");
-        final int epickId = fBTaskManager.createEpic(epic);
-        Epic epicUpdate = new Epic("TestNameUpdate", "TestdescriptionUpdate");
-
-        // Исполнение
-        fBTaskManager.updateEpic(epickId, epicUpdate);
-        Epic epic1 = fBTaskManager.findEpicById(epicUpdate.getId());
-
-        // Проверка
-        assertEquals(epicUpdate, epic1);
-    }
-
-    @Test
-    void deleteEpic() {
-        // Подготовка
-        Epic epic = new Epic("Test", "Testdescription");
-        final int epickId = fBTaskManager.createEpic(epic);
-        SubTask subTask = new SubTask("SubTaskName", "SubTaskDescription", Status.NEW, epickId);
-        fBTaskManager.createSubTask(subTask);
-        SubTask subTask2 = new SubTask("SubTaskName2", "SubTaskDescription2", Status.NEW, epickId);
-        fBTaskManager.createSubTask(subTask2);
-
-        // Исполнение
-        fBTaskManager.deleteEpic(epickId);
-        final Epic epic1 = fBTaskManager.findEpicById(epickId);
-        final List<SubTask> subTasks = fBTaskManager.findAllEpicSubtasks(epic);
-
-        // Проверка
-        assertNull(epic1, "Эпик не удалён");
-        assertTrue(subTasks.isEmpty(), "Подзадачи не удалены");
-    }
-
-    @Test
-    void deleteAllSubTask() {
-        //Подготовка
-        Epic epic = new Epic("Epic1", "Description Epic1");
-        fBTaskManager.createEpic(epic);
-        SubTask subTask = new SubTask("SubTask1", "Description SubTask1", Status.DONE, epic.getId());
-        fBTaskManager.createSubTask(subTask);
-
-        // Исполнение
-        fBTaskManager.deleteAllSubTask();
-        final List<SubTask> tasks = fBTaskManager.findAllSubTask();
-
-        // Проверка
-        assertTrue(tasks.isEmpty(), "Должен быть пустой");
-    }
-
-    @Test
-    void createSubTask() {
-        // Подготовка
-        Epic epic = new Epic("Test addNewEpic", "Test addNewEpic description");
-        final int epicId = fBTaskManager.createEpic(epic);
-
-        // Подготовка
-        SubTask subTask = new SubTask("Test addNewSubTask", "Test addNewSubTask description",
-                Status.NEW, epicId);
-        final int subTaskId = fBTaskManager.createSubTask(subTask);
-
-        // Исполнение
-        final SubTask subTasks = fBTaskManager.findSubTaskById(subTaskId);
-
-        // Проверка
-        assertNotNull(subTasks, "Задача не найдена.");
-        assertEquals(subTasks, subTask, "Задачи не совпадают.");
-
-        // Исполнение
-        final List<SubTask> subTasks1 = fBTaskManager.findAllSubTask();
-
-        // Проверка
-        assertNotNull(subTasks1, "Задачи не возвращаются.");
-        assertEquals(1, subTasks1.size(), "Неверное количество задач.");
-        assertEquals(subTask, subTasks1.get(0), "Задачи не совпадают.");
-    }
-
-    @Test
-    void updateSubTask() {
-        // Подготовка
-        Epic epic = new Epic("Test", "Testdescription");
-        final int epickId = fBTaskManager.createEpic(epic);
-        SubTask subTask = new SubTask("SubTaskName", "SubTaskDescription", Status.NEW, epickId);
-        final int subTaskId = fBTaskManager.createSubTask(subTask);
-        SubTask subTask2 = new SubTask("subTaskUpdate2", "SubTaskUpdateDescription2",
-                Status.IN_PROGRESS, epickId);
-
-        // Исполнение
-        fBTaskManager.updateSubTask(subTaskId, subTask2);
-        SubTask subTask1 = fBTaskManager.findSubTaskById(subTask2.getId());
-        // Проверка
-        assertEquals(subTask1, subTask2, "Подзадачи не совпадают");
-    }
-
-    @Test
-    void deleteSubTask() {
-        // Подготовка
-        Epic epic = new Epic("TestName", "Testdescription");
-        final int epickId = fBTaskManager.createEpic(epic);
-        SubTask subTask = new SubTask("SubTaskName", "SubTaskDescription", Status.NEW, epickId);
-        final int subTaskId = fBTaskManager.createSubTask(subTask);
-
-        // Исполнение
-        fBTaskManager.deleteSubTask(subTaskId);
-        SubTask subTask1 = fBTaskManager.findSubTaskById(subTaskId);
-
-        // Проверка
-        assertNull(subTask1, "Задача не удалена по ID");
-        assertNotEquals(epic.getSubTasksIds().size(), subTaskId, "Подзадача не удалена из Эпика");
-    }
-
-    @Test
-    void savingMultipleTasks() {
-        // Подготовка
-        Task task = new Task("Task1", "Description Task1", Status.NEW);
-        int idTask = fBTaskManager.createTask(task);
-
-        Epic epic = new Epic("Epic1", "Description Epic1");
-        int idEpic = fBTaskManager.createEpic(epic);
-        Epic epic2 = new Epic("Epic2", "Description Epic2");
-        int idEpic2 = fBTaskManager.createEpic(epic2);
-
-        SubTask subTask = new SubTask("SubTask1", "Description SubTask1", Status.DONE, epic.getId());
-        int idSubtask = fBTaskManager.createSubTask(subTask);
-
-        // Исполнение
-        Map<String, String[]> backupFile = new HashMap<>();
-        //Сохраняю ключ-значение, где ключ - это 0 индекс, значение - вся строка разбитая на массив, через запятую
-        try (BufferedReader br = new BufferedReader(new FileReader(tempFile, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] tack = line.split(",");
-                backupFile.put(tack[0], tack);
+        Epic epic2 = manager.findEpicById(epic.getId());
+        try {
+            List<String> taskList;
+            try (Stream<String> stream = Files.lines(file.toPath(), StandardCharsets.UTF_8)) {
+                taskList = stream
+                        .filter(s ->
+                                (!s.equals("id,type,name,status,description,epic,duration,startTime,endTime")))
+                        .filter(Objects::nonNull)
+                        .toList();
             }
+            String[] taskString = taskList.get(0).split(",");
+            String[] epcickString = taskList.get(1).split(",");
+            String[] subTaskString = taskList.get(2).split(",");
+
+            // Проверка
+            assertEquals(task.getName(), taskString[2], "Имя не совпадает");
+            assertEquals(task.getDescription(), taskString[4], "Описание не совпадает");
+            assertEquals(task.getStatus(), Status.valueOf(taskString[3]), "Статус не совпадает");
+            assertEquals(task.getId(), Integer.parseInt(taskString[0]), "ID не совпадает");
+            assertEquals(task.getDuration(), Duration.ofMinutes(Integer.parseInt(taskString[6])),
+                    "Duration не совпадает");
+            assertEquals(task.getStartTime(), LocalDateTime.parse(taskString[7], dtf), "StartTime не совпадает");
+            assertEquals(task.getEndTime(), LocalDateTime.parse(taskString[8], dtf), "EndTime не совпадает");
+
+            assertEquals(epic.getName(), epcickString[2], "Имя не совпадает");
+            assertEquals(epic.getDescription(), epcickString[4], "Описание не совпадает");
+            assertEquals(subTask.getStatus(), Status.valueOf(epcickString[3]), "Статус не совпадает");
+            assertEquals(epic2.getId(), Integer.parseInt(epcickString[0]), "ID не совпадает");
+            assertEquals(epic2.getDuration(), Duration.ofMinutes(Integer.parseInt(subTaskString[6])),
+                    "Duration не совпадает");
+            assertEquals(epic2.getStartTime(), LocalDateTime.parse(subTaskString[7], dtf),
+                    "StartTime не совпадает");
+            assertEquals(epic2.getEndTime(), LocalDateTime.parse(subTaskString[8], dtf), "EndTime не совпадает");
+            assertEquals(epic2.getSubTasksIds().get(0), Integer.parseInt(subTaskString[0]),
+                    "ID подзадачи не совпадает");
+
+            assertEquals(subTask.getName(), subTaskString[2], "Имя не совпадает");
+            assertEquals(subTask.getDescription(), subTaskString[4], "Описание не совпадает");
+            assertEquals(subTask.getStatus(), Status.valueOf(subTaskString[3]), "Статус не совпадает");
+            assertEquals(subTask.getId(), Integer.parseInt(subTaskString[0]), "ID не совпадает");
+            assertEquals(subTask.getDuration(), Duration.ofMinutes(Integer.parseInt(subTaskString[6])),
+                    "Duration не совпадает");
+            assertEquals(subTask.getStartTime(), LocalDateTime.parse(subTaskString[7], dtf),
+                    "StartTime не совпадает");
+            assertEquals(subTask.getEndTime(), LocalDateTime.parse(subTaskString[8], dtf), "EndTime не совпадает");
+            assertEquals(subTask.getEpicId(), Integer.parseInt(subTaskString[5]),
+                    "ID Эпика не совпадает");
         } catch (IOException e) {
-            String errorMessage = "Ошибка при загрузке менеджера";
-            throw new ManagerFileInitializationException(errorMessage + e.getMessage());
-        }
-
-        // Проверка
-        for (Map.Entry<String, String[]> entry : backupFile.entrySet()) {
-            if (entry.getKey().equals("id")) {
-                assertArrayEquals(new String[]{"id", "type", "name", "status", "description", "epic"}, entry.getValue(),
-                        "Заголовок не совпадает");
-
-            } else if (entry.getKey().equals("1")) {
-                assertEquals(String.valueOf(idTask), entry.getValue()[0], "Id не совпадает");
-                assertEquals(TaskType.TASK.toString(), entry.getValue()[1], "Type не совпадает");
-                assertEquals(task.getName(), entry.getValue()[2], "Имя не совпадает");
-                assertEquals(task.getStatus().toString(), entry.getValue()[3], "Status не совпадает");
-                assertEquals(task.getDescription(), entry.getValue()[4], "Description не совпадает");
-            } else if (entry.getKey().equals("2")) {
-                assertEquals(String.valueOf(idEpic), entry.getValue()[0], "Id не совпадает");
-                assertEquals(TaskType.EPIC.toString(), entry.getValue()[1], "Type не совпадает");
-                assertEquals(epic.getName(), entry.getValue()[2], "Имя не совпадает");
-                assertEquals(subTask.getStatus().toString(), entry.getValue()[3], "Status не совпадает");
-                assertEquals(epic.getDescription(), entry.getValue()[4], "Description не совпадает");
-            } else if (entry.getKey().equals("3")) {
-                assertEquals(String.valueOf(idEpic2), entry.getValue()[0], "Id не совпадает");
-                assertEquals(TaskType.EPIC.toString(), entry.getValue()[1], "Type не совпадает");
-                assertEquals(epic2.getName(), entry.getValue()[2], "Имя не совпадает");
-                assertEquals(epic2.getStatus().toString(), entry.getValue()[3], "Status не совпадает");
-                assertEquals(epic2.getDescription(), entry.getValue()[4], "Description не совпадает");
-            } else {
-                assertEquals(String.valueOf(idSubtask), entry.getValue()[0], "Id не совпадает");
-                assertEquals(TaskType.SUBTASK.toString(), entry.getValue()[1], "Type не совпадает");
-                assertEquals(subTask.getName(), entry.getValue()[2], "Имя не совпадает");
-                assertEquals(subTask.getStatus().toString(), entry.getValue()[3], "Status не совпадает");
-                assertEquals(subTask.getDescription(), entry.getValue()[4], "Description не совпадает");
-                assertEquals(epic.getId(), subTask.getEpicId(), "Epic не совпадает");
-            }
+            throw new ManagerFileInitializationException("Ошибка при проверке сохранённого файла: " + e.getMessage());
         }
     }
 
     @Test
     void downloadingDataFromAFile() {
         // Подготовка
-        Task task = new Task("Task1", "Description Task1", Status.NEW);
-        fBTaskManager.createTask(task);
-
+        Task task = new Task("Task1", "Description Task1", Status.NEW, Duration.ofMinutes(30),
+                LocalDateTime.parse("01.01.2020 - 09:00", dtf));
+        manager.createTask(task);
         Epic epic = new Epic("Epic1", "Description Epic1");
-        fBTaskManager.createEpic(epic);
-
-        SubTask subTask = new SubTask("SubTask1", "Description SubTask1", Status.DONE, epic.getId());
-        fBTaskManager.createSubTask(subTask);
-
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(tempFile);
-
+        manager.createEpic(epic);
+        SubTask subTask = new SubTask("SubTask1", "Description SubTask1",
+                Status.DONE, Duration.ofMinutes(30),
+                LocalDateTime.parse("02.01.2020 - 09:00", dtf), epic.getId());
+        manager.createSubTask(subTask);
 
         // Исполнение
-        fileBackedTaskManager = FileBackedTaskManager.loadFromFile(tempFile);
-        List<Task> tasks = fileBackedTaskManager.findAllTasks();
-        List<Epic> epics = fileBackedTaskManager.findAllEpic();
-        List<SubTask> subTasks = fileBackedTaskManager.findAllSubTask();
+        FileBackedTaskManager fileBackedTaskManager = FileBackedTaskManager.loadFromFile(file);
+        Task task1 = fileBackedTaskManager.findTaskById(task.getId());
+        Epic epic1 = fileBackedTaskManager.findEpicById(epic.getId());
+        SubTask subTask1 = fileBackedTaskManager.findSubTaskById(subTask.getId());
+
 
         // Проверка
-        for (Task task1 : tasks) {
-            assertEquals(task, task1, "Задачи не совпадает");
-        }
-
-        for (Epic epic1 : epics) {
-            epic.setStatus(subTask.getStatus()); // Статус начального эпика изменён SubTask'ом
-            assertEquals(epic, epic1, "Задачи не совпадает");
-        }
-
-        for (SubTask subTask1 : subTasks) {
-            assertEquals(subTask, subTask1, "Задачи не совпадает");
-        }
+        assertEquals(task, task1, "Задачи не совпадают");
+        assertEquals(epic.getName(), epic1.getName(), "Имя Эпика не совпадает");
+        assertEquals(epic.getDescription(), epic1.getDescription(), "Описание Эпика не совпадает");
+        assertEquals(epic.getId(), epic1.getId(), "ID Эпика не совпадает");
+        assertEquals(subTask.getStartTime(), epic1.getStartTime(), "StartTime Эпика не совпадает");
+        assertEquals(subTask.getDuration(), epic1.getDuration(), "Duration Эпика не совпадает");
+        assertEquals(subTask.getEndTime(), epic1.getEndTime(), "EndTime Эпика не совпадает");
+        assertEquals(subTask.getId(), epic1.getSubTasksIds().get(0), "ID Подзадачи у Эпика не совпадает");
+        assertEquals(subTask.getStatus(), epic1.getStatus(), "Статус Эпика и Подзадачи не совпадает");
+        assertEquals(subTask, subTask1, "Подзадачи не совпадают");
     }
 
     @Test
     void savingAndUploadingAnEmptyFile() {
-        // Подготовка
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(tempFile);
+        FileBackedTaskManager fileBackedTaskManager = FileBackedTaskManager.loadFromFile(file);
+        assertTrue(fileBackedTaskManager.findAllTasks().isEmpty(), "Задачи должны быть пустыми");
+        assertTrue(fileBackedTaskManager.findAllEpic().isEmpty(), "Эпики должны быть пустыми");
+        assertTrue(fileBackedTaskManager.findAllSubTask().isEmpty(), "Сабтаски должны быть пустыми");
+    }
 
-        // Исполнение
-        fileBackedTaskManager = FileBackedTaskManager.loadFromFile(tempFile);
-        List<Task> tasks = fileBackedTaskManager.findAllTasks();
-        List<Epic> epics = fileBackedTaskManager.findAllEpic();
-        List<SubTask> subTasks = fileBackedTaskManager.findAllSubTask();
+    @Test
+    void loadFromValidFileShouldNotThrowException() {
+        assertDoesNotThrow(() -> FileBackedTaskManager.loadFromFile(file));
+    }
 
-        // Проверка
-        for (Task task1 : tasks) {
-            assertTrue(tasks.isEmpty(), "Задачи должны быть пустыми");
-        }
+    @Test
+    void constructorWithValidFileShouldNotThrowException() {
+        assertDoesNotThrow(() -> new FileBackedTaskManager(file),
+                "Загрузка из допустимого файла не должна вызывать исключение");
+    }
 
-        for (Epic epic1 : epics) {
-            assertTrue(epics.isEmpty(), "Эпики должны быть пустыми");
-        }
+    @Test
+    void saveAndLoadWithValidDataShouldNotThrowException() {
+        Task task = new Task("Task1", "Description Task1", Status.NEW, Duration.ofMinutes(30),
+                LocalDateTime.parse("01.01.2020 - 09:00", dtf));
+        assertDoesNotThrow(() -> {
+            manager.createTask(task);
+            FileBackedTaskManager.loadFromFile(file);
+        }, "Сохранение и загрузка с использованием корректных данных не должны вызывать исключение");
+    }
 
-        for (SubTask subTask1 : subTasks) {
-            assertTrue(subTasks.isEmpty(), "Сабтаски должны быть пустыми");
-        }
+    @Test
+    void loadFromFileWithNullFileShouldThrowException() {
+        assertThrows(ManagerFileInitializationException.class, () -> FileBackedTaskManager.loadFromFile(null),
+                "Загрузка менеджера с переданным Null вместо файла, должна вызывать исключение");
+    }
+
+    @Test
+    void loadFromFileWithNonExistentFileShouldThrowException() {
+        File nonExistentFile = new File("non_existent_file.csv");
+        assertThrows(ManagerFileInitializationException.class, () ->
+                        FileBackedTaskManager.loadFromFile(nonExistentFile),
+                "Загрузка из файла, которого не существует, должна вызывать исключение");
     }
 }
