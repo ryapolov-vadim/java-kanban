@@ -55,7 +55,7 @@ public class InMemoryTaskManager implements TaskManager {
                 prioritizedTasks.add(taskNew);
                 tasks.put(taskNew.getId(), taskNew);
             } catch (TimeVerificationException e) {
-                System.out.println(e.getMessage());
+                throw e;
             }
         } else tasks.put(taskNew.getId(), taskNew);
         return task.getId();
@@ -69,6 +69,7 @@ public class InMemoryTaskManager implements TaskManager {
                     task.getDuration(), task.getStartTime());
             existingTask.setId(id);
             task.setId(id);
+            task.setType(TaskType.TASK);
             if (oldTask.getEndTime() != null) {
                 try {
                     timeVerification(existingTask);
@@ -78,11 +79,11 @@ public class InMemoryTaskManager implements TaskManager {
                         prioritizedTasks.add(existingTask);
                         tasks.put(existingTask.getId(), existingTask);
                     } catch (TimeVerificationException e) {
-                        System.out.println(e.getMessage());
                         prioritizedTasks.add(oldTask);
+                        throw e;
                     }
                 } catch (TimeVerificationException e) {
-                    System.out.println(e.getMessage());
+                    throw e;
                 }
             } else {
                 tasks.put(existingTask.getId(), existingTask);
@@ -150,6 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
             existingEpic.setName(epic.getName());
             existingEpic.setDescription(epic.getDescription());
             epic.setId(id);
+            epic.setType(TaskType.EPIC);
             return epic;
         }
         return null;
@@ -232,7 +234,7 @@ public class InMemoryTaskManager implements TaskManager {
                     updateTimeEpic(epic.getId());
                     prioritizedTasks.add(subTaskNew);
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    throw e;
                 }
             } else {
                 epic.getSubTasksIds().add(subTaskNew.getId());
@@ -252,6 +254,7 @@ public class InMemoryTaskManager implements TaskManager {
                     subTask.getDuration(), subTask.getStartTime(), subTask.getEpicId());
             updateSubtask.setId(id);
             subTask.setId(id);
+            subTask.setType(TaskType.SUBTASK);
             try {
                 timeVerification(updateSubtask);
                 try {
@@ -269,11 +272,10 @@ public class InMemoryTaskManager implements TaskManager {
                     updateTimeEpic(updateSubtask.getEpicId());
                     prioritizedTasks.add(updateSubtask);
                 } catch (TimeVerificationException e) {
-                    System.out.println(e.getMessage());
-                    prioritizedTasks.add(oldSubTask);
+                    throw e;
                 }
             } catch (TimeVerificationException e) {
-                System.out.println(e.getMessage());
+                throw e;
             }
             return subTask;
         }

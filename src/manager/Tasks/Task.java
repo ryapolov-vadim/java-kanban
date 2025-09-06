@@ -74,6 +74,10 @@ public class Task {
         this.duration = duration;
     }
 
+    public void setType(TaskType type) {
+        this.type = type;
+    }
+
     public LocalDateTime getStartTime() {
         return startTime;
     }
